@@ -522,8 +522,8 @@ const FXN={tempo:'im Tempo- und Flügelspiel',rueck:'im Rückraumspiel',kreis:'i
 const TIER=['','','+','++'];
 const SPECIAL=['inform','held','zukunft','ikone','tds','sds'];
 const VERN={normal:'',jugend:'Jugend',inform:'Inform',held:'Spieltag-Held',zukunft:'Zukunftsstar',ikone:'Ikone',tds:'Team des Spieltages',sds:'Spieler des Spieltages'};
-const FN=['Jonas','Lukas','Niklas','Finn','Mats','Tim','Lasse','Erik','Jannik','Mika','Ole','Hendrik','Luca','Marko','Emil','Filip','Tobias','Felix','Noah','Leon','Aron','Bjarne','Torben','Jakob','Simon','Malte','Juri','Levin','Janne','Till'];
-const LN=['Brandner','Hollmeier','Kessling','Lindholt','Pederhoff','Riedler','Schustek','Wendling','Falkner','Jansing','Bergmeier','Strandt','Voigtner','Lorentz','Mertel','Dahlberg','Brückel','Wolfram','Engler','Haasler','Thielen','Lundgren','Seidler','Rittner','Kramm','Ehlert','Grafing','Hofstetter','Winkelmann','Albers'];
+const FN=['Jonas','Paul','Moritz','Ben','David','Julian','Kevin','Sebastian','Florian','Philipp','Max','Jan','Nico','Dominik','Marvin','Robin','Lars','Henrik','Kasper','Mads','Oskar','Viktor','Anton','Elias','Matthias','Rasmus','Johan','Andrej','Pavel','Luka','Ivan','Hugo','Theo','Lenny','Fabian','Kilian','Linus','Jasper','Mattis','Carl','Lukas','Niklas','Finn','Mats','Tim','Lasse','Erik','Jannik','Mika','Ole','Hendrik','Luca','Marko','Emil','Filip','Tobias','Felix','Noah','Leon','Aron','Bjarne','Torben','Jakob','Simon','Malte','Juri','Levin','Janne','Till'];
+const LN=['Brandner','Kronberg','Ahlmann','Feldtmann','Riegler','Sandvik','Holmgren','Nyberg','Kovač','Marić','Horvat','Dufour','Lemaire','Jakobi','Steinhaus','Waldner','Kühnel','Bertram','Reinholt','Uhlig','Petersen','Vogt','Hagedorn','Lüders','Sörensen','Krämer','Bachmann','Eggert','Fröhlich','Hartwig','Ihlenfeld','Jessen','Kolbe','Lehnert','Mahler','Nordmann','Oltmanns','Pfeiffer','Quast','Rademacher','Hollmeier','Kessling','Lindholt','Pederhoff','Riedler','Schustek','Wendling','Falkner','Jansing','Bergmeier','Strandt','Voigtner','Lorentz','Mertel','Dahlberg','Brückel','Wolfram','Engler','Haasler','Thielen','Lundgren','Seidler','Rittner','Kramm','Ehlert','Grafing','Hofstetter','Winkelmann','Albers'];
 const STY=['tempo','rueck','kreis'];
 const ATTN={tempo:'Tempo & Flügel',rueck:'Rückraum',kreis:'Kreisspiel'};
 const ATTD={tempo:'Gegenstösse und Abschlüsse über die Aussen',rueck:'Würfe aus neun Metern',kreis:'Anspiele an den Kreis'};
@@ -607,7 +607,7 @@ const livePrice=c=>Math.round(val(c)*2/100)*100;
 const bisTxt=()=>new Date(LIVE.bis).toLocaleDateString('de-CH',{weekday:'short',day:'numeric',month:'long'});
 const offKind=k=>['inform','held','zukunft','ikone'].includes(k)?'special':k==='rabatt'?'gold':'offer';
 const ROT=['flitzer','rakete','kreis','tor','abwehr','verein','inform','rabatt','zukunft'];
-function val(c){let v=c.ovr<65?40+(c.ovr-47)*6:c.ovr<75?200+(c.ovr-65)*35:450*Math.pow(1.22,c.ovr-75);if(SPECIAL.includes(c.ver))v*=1.5;if(c.ver==='jugend')v*=.5;return Math.round(v/10)*10}
+function val(c){let v=c.ovr<70?60:200*Math.pow(1.47,c.ovr-77);const a=ageOf(c);if(a){v*=a<=21?1.35:a<=24?1.2:a<=29?1:a<=31?.8:a<=33?.55:.3}if(SPECIAL.includes(c.ver))v*=1.3;if(c.ver==='jugend')v*=.8;if(c.leg)v*=.5;return Math.max(50,Math.round(v/10)*10)}
 function rar(c){if(c.ver!=='normal')return c.ver;const o=c.ovr+lboost(c);return o<65?'bronze':c.ovr<75?'silber':o>=84?'gold rare':'gold'}
 const short=n=>{const p=n.split(' ');return p.length>1?p[0][0]+'. '+p.slice(1).join(' '):n};
 function team(id){if(id==='ME')return{id:'ME',n:S?S.club:'Mein Verein',c:S?S.col||'#ff5b2e':'#ff5b2e'};if(id==='JUG')return{id:'JUG',n:'Jugend',c:'#4f7a5d'};const t=CLUBS.find(t=>t.id===id);if(t)return{id,n:t.n,c:t.col};const z=typeof ZBL!=='undefined'&&(ZBL.find(x=>x.id===id)||CLT.find(x=>x.id===id));return z?{id,n:z.n,c:z.col}:{id,n:id,c:'#555'}}
@@ -754,14 +754,15 @@ function ensureK16(){const core=coreIds();let k=(S.k16||[]).filter(id=>byId(id)&
 const inK16=id=>S.squad.length<=16||S.k16.includes(id);
 
 /* ---------- Karriere & Saison ---------- */
-const LVLS={schwach:{n:'Schwach',r:[79,82],coins:6000,d:'kämpft gegen den Abstieg'},mittel:{n:'Mittel',r:[80,83],coins:3000,d:'Mittelfeld bis unten'},gut:{n:'Gut',r:[82,85],coins:2500,d:'obere Hälfte'},sehr:{n:'Sehr gut',r:[84,87],coins:2000,d:'Europapokal-Kandidat'},welt:{n:'Weltklasse',r:[85,89],coins:1500,d:'Titelfavorit'}};
-function genStart(lv){const[lo,hi]=(LVLS[lv]||LVLS.mittel).r,used=new Set(),inR=(t,a,b)=>{const r=RM(t.o);return r>=a&&r<=b};
- const nats={};TP.forEach(t=>{if(t.nat&&inR(t,lo-1,hi+1))(nats[t.nat]=nats[t.nat]||new Set()).add(t.p)});const good=Object.keys(nats).filter(n=>nats[n].size>=6),N=good.length?pick(good):null;
- const best=(pos,a,b,pref)=>{const L=TP.filter(t=>t.p===pos&&!used.has(t.i)&&inR(t,a,b));if(!L.length)return null;const sc=t=>pref(t)+Math.random();L.sort((x,y)=>sc(y)-sc(x));used.add(L[0].i);return fromT(L[0])};
- const sq=[],st={};
- POS.forEach(p=>{const nb=CLINKS.filter(l=>l.includes(p)).map(l=>l[0]===p?l[1]:l[0]),pref=t=>(t.nat===N?2:0)+nb.reduce((s,q)=>s+(st[q]&&st[q].club===t.c?1.2:0),0);const c=best(p,lo,hi,pref)||best(p,lo-2,hi,pref);if(c){st[p]=c;sq.push(c)}});
- POS.forEach(p=>{const c=best(p,lo-1,hi-1,t=>t.nat===N?.6:0)||best(p,lo-2,hi,()=>0);if(c)sq.push(c)});
- for(let i=0;i<6;i++){const p=pick(FIELD);const c=best(p,lo-1,hi-1,()=>0)||best(p,lo-2,hi,()=>0);if(c)sq.push(c)}return sq}
+const LVLS={schwach:{n:'Schwach',r:[78,81],coins:6000,d:'kämpft gegen den Abstieg'},mittel:{n:'Mittel',r:[79,83],coins:3000,d:'Mittelfeld bis unten'},gut:{n:'Gut',r:[81,84],coins:2500,d:'obere Hälfte'},sehr:{n:'Sehr gut',r:[82,85],coins:2000,d:'Europapokal-Kandidat'},welt:{n:'Weltklasse',r:[83,87],coins:1500,d:'Titelfavorit'}};
+const FNAT=['GER','GER','GER','GER','GER','DEN','SWE','NOR','AUT','SUI','CRO','SLO','ISL','NED','FRA','ESP'];
+function fakeCard(pos,ovr,used){let nm;do{nm=pick(FN)+' '+pick(LN)}while(used.has(nm)||TP.some(t=>t.n===nm));used.add(nm);
+ const pool=Object.keys(PSPOS).filter(k=>PSPOS[k].includes(pos)),ab=[],n=ovr>=85?3:ovr>=82?2:ovr>=79?R(1,2):1;
+ for(let i=0;i<n&&pool.length;i++){const k=pool.splice(Math.floor(Math.random()*pool.length),1)[0];ab.push({k,t:Math.max(1,Math.min(3,(ovr>=86?3:ovr>=82?2:1)-(i?1:0)))})}
+ const a=R(19,33);return{id:uid(),t:null,fake:true,name:nm,pos,ovr,ver:'normal',st:POSW[pos].map(o=>clamp(ovr+Math.round(o*.6)+R(-2,2),40,99)),ab,club:'ME',nat:pick(FNAT),geb:String(TODAY.getFullYear()-a),cm:0,kg:0,role:''}}
+function genStart(lv){const[lo,hi]=(LVLS[lv]||LVLS.mittel).r,used=new Set(),sq=[];
+ POS.forEach(p=>{sq.push(fakeCard(p,R(lo+1,hi),used));sq.push(fakeCard(p,R(lo,hi-1),used))});
+ for(let i=0;i<6;i++)sq.push(fakeCard(pick(FIELD),R(lo-1,hi-2),used));return sq}
 const cpow=p=>p.tempo+p.rueck+p.kreis+p.def+p.gk;
 function sqPow(sq){const A0=bestLine(sq),A=chemLine(sq,A0),D=capD(A,bestDef(sq,A));return cpow(power(A,D,0,true))}
 function genBest(lv){const T=ids().filter(i=>i!=='ME').map(id=>{const o=oppInfo(id);return cpow(power(o.A,o.D,0))}).sort((a,b)=>b-a),off=diffB()*5;
@@ -877,7 +878,7 @@ function topOffer(){if(S.phase!=='season'||S.md>=S.len)return null;const fx=next
  const min=79+(5-r),o=team(fx.opp);return{k:'top'+S.md,n:`Topspiel-Pack: ${o.n}`,d:`5 Spieler, davon 1 mit ${min}+ und 1 Spieler von ${o.n}. Der Gegner ist Tabellen-${r}., deshalb ist die Garantie ${min}+.`,p:14000+(5-r)*2500,
   gen:()=>{const top=poolPick(t=>t.o>=min,t=>Math.max(Math.pow(.72,t.o-min),.05))||poolPick(t=>t.o>=78);const cl=poolPick(t=>t.c===fx.opp&&t.o>=75&&t!==top,goldW);return[fromT(top),cl?fromT(cl):goldCard(),...goldN(3)]}}}
 const MKT_N=8,MAXSQ=28;
-const salOf=o=>Math.round(400*Math.pow(1.35,Math.max(0,o-77))/10)*10;
+const salOf=o=>Math.round(400*Math.pow(1.3,Math.max(0,o-77))/10)*10;
 const sal=c=>c.sl!=null?c.sl:(c.sl=salOf(c.ovr));
 const salSum=()=>S.squad.reduce((a,c)=>a+sal(c),0);
 const injured=c=>!!(c&&S&&S.inj&&S.inj[c.id]&&S.inj[c.id].until>S.md);
@@ -890,7 +891,7 @@ const prestige=()=>S.mode==='take'?Math.max(0,Math.min(1,((CLUBP[S.repl]||70)-69
 const refuseP=c=>Math.max(0,Math.min(.6,(c.ovr-79)*.1-prestige()*.35));
 function mkCard(m){if(m.L){const l=LEGENDS.find(x=>x.n===m.L);if(l){const c=legendCardOf(l);return c}}const t=TP[m.i];const c=fromT(t,m.v||'normal');if(m.live)c.live=m.live;return c}
 function legendCardOf(l){return{id:uid(),t:null,leg:true,name:l.n,pos:l.p,ovr:RM(l.o),ver:'ikone',st:POSW[l.p].map(o=>clamp(RM(l.o)+Math.round(o*.6),40,99)),ab:l.ps.map(([k,t])=>({k,t})),club:l.c,nat:l.nat,geb:'',cm:0,kg:0,role:'Legende'}}
-const mPrice=m=>{const c=m._c||(m._c=mkCard(m));return Math.max(300,Math.round(val(c)*2.2/100)*100)};
+const mPrice=m=>{const c=m._c||(m._c=mkCard(m));return Math.max(100,Math.round(val(c)*1.12/10)*10)};
 const SELLO={schnell:{n:'Schnellverkauf',d:'70 % des Marktwerts, Käufer meist schon nach dem nächsten Spieltag',f:.7,min:1,max:1,p:1},markt:{n:'Marktwert',d:'Voller Marktwert, ein Käufer findet sich in 1 bis 3 Spieltagen',f:1,min:1,max:3,p:1},hoch:{n:'Hoher Preis',d:'140 % des Marktwerts, dauert 3 bis 5 Spieltage und klappt nicht immer',f:1.4,min:3,max:5,p:.6}};
 const NROLE={key:{n:'Schlüsselspieler',r:3},start:{n:'Stammspieler',r:2},rot:{n:'Rotationsspieler',r:1}};
 function roleExp(c){const o=S.squad.map(x=>x.ovr).sort((a,b)=>b-a);return c.ovr>=(o[2]||0)?'key':c.ovr>=(o[8]||0)?'start':'rot'}
@@ -1057,7 +1058,7 @@ function finish(){
   resolveCupRound({h,a,x:M.home?a0:b0,y:M.home?b0:a0,pen:so?` n.7m ${M.home?so[0]+':'+so[1]:so[1]+':'+so[0]}`:'',w:w==='W'?'ME':M.opp});
   coins*=1.3;if(w==='W'){gems=M.round===4?20:M.round===3?8:4;cupTxt=M.round===4?'Pokalsieg!':`Weiter: ${CUPN[M.round+1]}`;if(M.round===4){P.stats.cups++}}else cupTxt=`Pokal-Aus im ${CUPN[M.round]}`;
   if(S.cup.best>=2&&!P.goals.g3){const r=achieve('g3');if(r)S.unl=(S.unl||[]).concat([r])}if(S.cup.won&&!P.goals.g6){const r=achieve('g6');if(r)S.unl=(S.unl||[]).concat([r])}}
- advanceCup();advanceCL();coins=Math.round(coins/10)*10;S.coins+=coins;if(gems)addGems(gems,'Pokal');
+ advanceCup();advanceCL();coins=Math.round(coins*.5/10)*10;S.coins+=coins;if(gems)addGems(gems,'Pokal');
  let mor='';if(w==='W'){S.streak++;S.lstreak=0;if(S.streak%2===0&&S.morale<5){S.morale++;mor='Zwei Siege in Folge: Moral steigt'}}else{S.streak=0;if(w==='L'){S.lstreak++;if(S.morale>1&&(!bo('psych')||S.lstreak>=2)){S.morale--;mor='Die Niederlage kostet Moral'}}}
  const tp=Object.entries(M.goals).sort((x,y)=>y[1]-x[1])[0];
  S.post={st:M.st,pas:M.pas,kind:k,round:M.round,cupTxt,w,sh:a0,so:b0,so7:so,opp:M.opp,home:M.home,coins,pack,gems,top:M.top,mvp:tp?[pn('me',tp[0]),tp[1]]:null,saves:M.saves,mor,md:k==='liga'?S.md:null,pens:[M.pens.me,M.pens.op],rep:{rs:M.rs,me:Object.entries(M.goals).map(([p,n])=>[pn('me',p),n]).sort((a,b)=>b[1]-a[1]),op:Object.entries(M.og).sort((a,b)=>b[1]-a[1])}};
@@ -1099,7 +1100,7 @@ function computeTots(){const tab=sorted(),rk=id=>tab.findIndex(r=>r.id===id)+1,o
  const mvp=out.slice().sort((x,y)=>y.s-x.s)[0];return{team:out,mvp}}
 function seasonEnd(){const pl=rankOf('ME'),n=ids().length;
  const r=pl===1?{coins:30000,pack:'o:ikone',msg:'Meister! Die Schale gehört euch.'}:pl<=3?{coins:20000,pack:'premium',msg:'Podestplatz, starke Saison.'}:pl<=8?{coins:10000,pack:'gold',msg:'Obere Tabellenhälfte.'}:pl<=n-2?{coins:5000,pack:null,msg:'Klassenerhalt geschafft.'}:{coins:2000,pack:null,msg:'Abstieg. Der Vorstand ist unzufrieden, doch die Karriere geht weiter.'};
- S.coins+=r.coins;if(r.pack==='o:ikone'&&S.squad.length<MAXSQ){const L=legendCard();PK=new Set();S.squad.push(L);r.msg+=` Als Belohnung kommt Legende ${L.name} (${L.ovr}) in deinen Kader.`}else if(r.pack==='premium')S.coins+=8000;else if(r.pack==='gold')S.coins+=4000;if(pl===1){S.titles++;P.stats.titles++}
+ r.coins=Math.round(r.coins*.5);S.coins+=r.coins;if(r.pack==='o:ikone'&&S.squad.length<MAXSQ){const L=legendCard();PK=new Set();S.squad.push(L);r.msg+=` Als Belohnung kommt Legende ${L.name} (${L.ovr}) in deinen Kader.`}else if(r.pack==='premium')S.coins+=8000;else if(r.pack==='gold')S.coins+=4000;if(pl===1){S.titles++;P.stats.titles++}
  const g=[50,30,30,20,20,20,12,12,12,12,6,6,6,6,6,6,3,3][pl-1]||3;addGems(g,`Platz ${pl}`);
  S.tots=computeTots();const mine=S.tots.team.filter(x=>x.mine).length;if(mine)addGems(mine*10,'Team der Saison');if(S.tots.mvp&&S.tots.mvp.mine)addGems(25,'Spieler der Saison');
  const unl=S.unl||[];const tryG=(id,ok)=>{if(ok){const x=achieve(id);if(x)unl.push(x)}};
@@ -1290,7 +1291,7 @@ function menuView(){const top=[...TP].sort((a,b)=>b.o-a.o),demo=[fromT(top[3]),f
 function newView(){const ord=clubOrder(),w=ord[0].id;
  return `<h2>Neue Karriere</h2><p class="mut">Am Anfang spielst du mit einem eigenen Verein. Bundesligisten schaltest du über Ziele oder mit Gems frei. Bessere Vereine haben bessere Spieler und mehr Budget.</p>
  <div class="two" style="margin-top:16px"><form id="ownf" class="panel" style="display:grid;gap:12px"><h3>Eigener Verein</h3>
- <p class="sm mut" style="margin:0">Wie im FIFA-Karrieremodus: Du wählst, wie stark dein zufälliger Startkader ist (20 echte Spieler, je 2 pro Position). Schwächere Teams bekommen mehr Transferbudget.</p>
+ <p class="sm mut" style="margin:0">Wie im FIFA-Karrieremodus: Dein Verein startet mit 20 erfundenen Spielern (je 2 pro Position). Du wählst, wie stark sie sind. Echte Spieler holst du dir über Angebote auf dem Transfermarkt. Schwächere Teams bekommen mehr Transferbudget.</p>
  <label>Vereinsname<br><input id="cn" maxlength="24" value="HC Hallenhelden" style="width:100%"></label>
  <div><span class="sm mut">Vereinsfarbe</span><div class="row" style="margin-top:6px">${['#ff5b2e','#1f6feb','#13a35b','#d4a100','#9b30d9','#e2244b','#111111'].map((c,i)=>`<label class="sw" style="--c:${c}"><input type="radio" name="col" value="${c}" ${i?'':'checked'}><span></span></label>`).join('')}</div></div>
  <div><span class="sm mut">Kaderstärke</span><div class="lvsel" style="margin-top:6px">${Object.entries(LVLS).map(([k,o])=>`<label><input type="radio" name="lv" value="${k}" ${k==='mittel'?'checked':''}>${o.n}<small>${o.r[0]}–${o.r[1]}</small><small>${money(o.coins)}</small></label>`).join('')}</div><p class="sm mut" style="margin:6px 0 0">Schwach: Abstiegskampf · Mittel: Mittelfeld bis unten · Gut: obere Hälfte · Sehr gut: Europapokal · Weltklasse: Titelfavorit</p></div>
