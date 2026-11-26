@@ -415,6 +415,10 @@ line.clink{stroke-width:1.1;stroke-linecap:round;opacity:.9}line.clink.g{stroke:
 .saleslist{display:flex;flex-direction:column;gap:6px}.salerow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:#1f252c;border:1px solid #2c343e;border-radius:12px;padding:8px 10px}
 .mnew.live{background:#ff3d6e;color:#fff}.mnew.leg{background:linear-gradient(135deg,#fff3b8,#e0a21a);color:#1d1406}
 .listed{position:absolute;top:4px;right:4px;z-index:3;background:#ffd25a;color:#1d1406;font:800 11px 'Barlow Condensed';padding:1px 6px;border-radius:5px}
+/* iPhone-App: Platz für Statusleiste und Home-Balken */
+.top{padding-top:calc(10px + env(safe-area-inset-top));padding-left:max(3vw,14px,env(safe-area-inset-left));padding-right:max(3vw,14px,env(safe-area-inset-right))}
+main{padding-bottom:calc(40px + env(safe-area-inset-bottom))}
+.ov{padding-top:calc(16px + env(safe-area-inset-top));padding-bottom:calc(16px + env(safe-area-inset-bottom))}
 </style>
 <meta name="theme-color" content="#0e1116">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1435,7 +1439,8 @@ function decorate(root){root=root||document;const add=(el,n)=>{if(!n||!el||el.qu
  root.querySelectorAll('.upg>b').forEach(b=>{const t=b.textContent.trim();const m=ICH.find(([k])=>t.startsWith(k))||[[0],t.startsWith('Einführung')?'eye':null];add(b,m[1])});
  root.querySelectorAll('.tinfo>span').forEach(sp=>{const t=sp.textContent.trim();add(sp,t.startsWith('Saison')?'cal':t.startsWith('Platz')?'trophy':null)});
  root.querySelectorAll('.goalbar .gb-t').forEach(e=>add(e,'target'))}
-const _render=render;render=function(){_render.apply(this,arguments);try{decorate()}catch(e){}};
+const setTH=()=>{const t=document.querySelector('.top');if(t)document.documentElement.style.setProperty('--th',t.offsetHeight+'px')};addEventListener('resize',setTH);
+const _render=render;render=function(){_render.apply(this,arguments);try{decorate();setTH()}catch(e){}};
 const _renderOv=renderOv;renderOv=function(){_renderOv.apply(this,arguments);try{const mp=$('#mprompt');if(mp){if(OV&&['7m','pen','crunch'].includes(OV.type)){const ov=$('#ov');mp.innerHTML=ov.innerHTML;ov.innerHTML='';ov.classList.remove('on');try{mp.scrollIntoView({block:'nearest',behavior:'smooth'})}catch(e){}}else mp.innerHTML=''}decorate($('#ov'))}catch(e){}};
 loadP();
 S=load();if(S&&!S.v7){S.v7=true;(S.squad||[]).forEach(c=>{const o0=c.ovr,o=RM(o0);c.ovr=o;c.st=c.st.map(v=>Math.max(40,Math.min(99,Math.round(o+(v-o0)*.6))));if(c.pot)c.pot=Math.min(86,RM(c.pot));if(c.base&&c.base.st){const b0=c.base.ovr,b=RM(b0);c.base.ovr=b;c.base.st=c.base.st.map(v=>Math.max(40,Math.min(99,Math.round(b+(v-b0)*.6))))}if(c.t!=null&&TP[c.t]&&!c.ab.length)c.ab=TP[c.t].ps.map(([k,t])=>({k,t}))});S.market=[];S.marketKey=null}
