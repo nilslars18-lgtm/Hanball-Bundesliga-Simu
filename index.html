@@ -915,7 +915,7 @@ function rollForm(){const st=POS.map(p=>byId(S.lineup[p])).filter(Boolean);if(!s
 function addRes(h,a,gh,ga){[[h,gh,ga],[a,ga,gh]].forEach(([id,f,g])=>{const r=S.tab[id];r.sp++;r.gf+=f;r.ga+=g;if(f>g){r.s++;r.pts+=2}else if(f===g){r.u++;r.pts++}else r.n++})}
 const str=id=>id==='ME'?myPower().ovr:isZ(id)?power(oppInfo(id).A,oppInfo(id).D,oppBoost()).ovr:oppPower(id).ovr+oppBoost();
 const nrand=()=>(Math.random()+Math.random()+Math.random()-1.5)*5;
-function simScore(h,a){const s1=str(h),s2=str(a);const r=[Math.max(17,Math.round(29+(s1-s2)*.45+1.2+nrand())),Math.max(17,Math.round(29+(s2-s1)*.45+nrand()))];if(S.t7b){delete S.t7b[h];delete S.t7b[a]}return r}
+function simScore(h,a){const tf=()=>(Math.random()+Math.random()-1)*4.5,s1=str(h)+tf(),s2=str(a)+tf();const r=[Math.max(17,Math.round(29+(s1-s2)*.45+1.2+nrand())),Math.max(17,Math.round(29+(s2-s1)*.45+nrand()))];if(S.t7b){delete S.t7b[h];delete S.t7b[a]}return r}
 function simOthers(md){S.sched[md].forEach(([h,a])=>{if(h==='ME'||a==='ME')return;const[x,y]=simScore(h,a);addRes(h,a,x,y);recGame('liga',h,a,x,y)})}
 /* ---------- Hintergrund-Statistik: Torschützen & Start 7 ---------- */
 const GW={LA:.85,RA:.85,RL:1.15,RR:1.15,RM:1.05,KM:.9};let T7BUF={liga:[],cl:[],el:[]};
